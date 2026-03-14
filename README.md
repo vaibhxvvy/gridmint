@@ -19,7 +19,7 @@ Pick a pattern. Tweak it. Copy the code in any format.
 
 [![Live](https://img.shields.io/badge/▶%20Live-gridbox.ink-c8ff00?style=for-the-badge&labelColor=0a0a0a)](https://gridbox.ink)
 &nbsp;
-[![Stars](https://img.shields.io/github/stars/vaibhav/gridbox?style=for-the-badge&labelColor=0a0a0a&color=c8ff00)](https://github.com/vaibhav/gridbox/stargazers)
+[![Stars](https://img.shields.io/github/stars/vaibhav/gridbox?style=for-the-badge&labelColor=0a0a0a&color=c8ff00)](https://github.com/vaibhxvvy/gridbox/stargazers)
 &nbsp;
 [![License](https://img.shields.io/badge/License-MIT-c8ff00?style=for-the-badge&labelColor=0a0a0a)](LICENSE)
 &nbsp;
@@ -155,7 +155,7 @@ The lag you see in single-file generators is caused by redrawing all thumbnails 
 ## Running locally
 
 ```bash
-git clone https://github.com/vaibhav/gridbox
+git https://github.com/vaibhxvvy/gridbox
 cd gridbox
 npm install
 npm run dev
@@ -226,6 +226,6 @@ MIT — free for personal and commercial use.
 
 <div align="center">
 
-[gridbox.ink](https://gridbox.ink) &nbsp;·&nbsp; [Report a bug](https://github.com/vaibhav/gridbox/issues) &nbsp;·&nbsp; [Request a pattern](https://github.com/vaibhav/gridbox/issues)
+[gridbox.ink](https://gridbox.ink) &nbsp;·&nbsp; [Report a bug](https://github.com/vaibhxvvy/gridbox/issues) &nbsp;·&nbsp; [Request a pattern](https://github.com/vaibhxvvy/gridbox/issues)
 
 </div>

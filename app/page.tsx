@@ -10,7 +10,7 @@ export default function LandingPage() {
         <span className={styles.navLogo}>gridbox</span>
         <a
           className={styles.navGithub}
-          href="https://github.com/vaibhav/gridbox"
+          href="https://github.com/vaibhxvvy/gridbox"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -50,7 +50,7 @@ export default function LandingPage() {
             live preview
           </Link>
           <a
-            href="https://github.com/vaibhav/gridbox"
+            href="https://github.com/vaibhxvvy/gridbox"
             target="_blank"
             rel="noopener noreferrer"
             className={styles.ctaFilled}
@@ -80,7 +80,7 @@ export default function LandingPage() {
       <footer className={styles.footer}>
         <span>gridbox.ink</span>
         <span className={styles.footerSep}>·</span>
-        <a href="https://github.com/vaibhav/gridbox" target="_blank" rel="noopener noreferrer">github</a>
+        <a href="https://github.com/vaibhxvvy/gridbox" target="_blank" rel="noopener noreferrer">github</a>
         <span className={styles.footerSep}>·</span>
         <span>MIT license</span>
       </footer>

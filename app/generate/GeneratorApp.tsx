@@ -82,7 +82,7 @@ export default function GeneratorApp() {
           </button>
           <a
             className={`${styles.tbBtn} ${styles.tbGithub}`}
-            href="https://github.com/vaibhav/gridbox"
+            href="https://github.com/vaibhxvvy/gridbox"
             target="_blank"
             rel="noopener noreferrer"
           >
