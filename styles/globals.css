@@ -1,0 +1,46 @@
+@import './tokens.css';
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--gb-bg);
+  color: var(--gb-text);
+  font-family: var(--gb-font-mono);
+  font-size: 11px;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gb-border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gb-muted); }
+
+/* Range inputs */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%; height: 2px;
+  background: var(--gb-border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  background: var(--gb-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--gb-ease);
+}
+input[type=range]::-webkit-slider-thumb:hover { background: #fff; }
+
+/* Color picker */
+input[type=color] {
+  width: 18px; height: 18px;
+  border: none; background: none; padding: 0;
+  cursor: pointer; border-radius: 3px;
+}
+input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type=color]::-webkit-color-swatch { border: none; border-radius: 3px; }

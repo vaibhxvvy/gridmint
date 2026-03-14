@@ -1,0 +1,42 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--gb-border);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background: var(--gb-s2);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  transition: border-color 0.12s, transform 0.1s;
+}
+.cell:hover  { border-color: var(--gb-accent); transform: scale(1.04); }
+.cell.active { border-color: var(--gb-accent); box-shadow: 0 0 0 1px var(--gb-accent); }
+
+.canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+.label {
+  position: relative;
+  z-index: 1;
+  font-size: 7px;
+  color: #fff;
+  background: rgba(0,0,0,0.55);
+  padding: 1px 4px;
+  border-radius: 2px;
+  text-shadow: 0 1px 2px #000;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}

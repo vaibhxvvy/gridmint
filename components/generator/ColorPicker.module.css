@@ -1,0 +1,51 @@
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.label {
+  font-size: 8px;
+  color: var(--gb-muted);
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+}
+
+.wrap {
+  display: flex;
+  align-items: center;
+  background: var(--gb-s2);
+  border: 1px solid var(--gb-border);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.12s;
+}
+.wrap:hover,
+.wrap:focus-within {
+  border-color: var(--gb-accent);
+}
+
+.swatchBtn {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.hexInput {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--gb-font-mono);
+  font-size: 9px;
+  color: var(--gb-text);
+  padding: 0 6px 0 0;
+}

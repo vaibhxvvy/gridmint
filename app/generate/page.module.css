@@ -1,0 +1,175 @@
+/* ══════════════════════════════
+   GENERATOR PAGE
+══════════════════════════════ */
+
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--gb-bg);
+  font-family: var(--gb-font-mono);
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  height: var(--gb-topbar-h);
+  background: var(--gb-s2);
+  border-bottom: 1px solid var(--gb-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.topbarLogo {
+  position: absolute;
+  left: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gb-accent);
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition: opacity 0.14s;
+}
+.topbarLogo:hover { opacity: 0.75; }
+
+.topbarTitle {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gb-text);
+}
+
+.topbarActions {
+  position: absolute;
+  right: 14px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tbBtn {
+  font-family: var(--gb-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  padding: 6px 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.14s;
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1;
+}
+
+.tbShare {
+  background: rgba(200,255,0,0.10);
+  border: 1px solid var(--gb-accent);
+  color: var(--gb-accent);
+}
+.tbShare:hover { background: var(--gb-accent); color: #000; }
+
+.tbGithub {
+  background: var(--gb-s3);
+  border: 1px solid #444;
+  color: var(--gb-text);
+}
+.tbGithub:hover { background: var(--gb-text); border-color: var(--gb-text); color: #000; }
+
+/* ── SHELL ── */
+.shell {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── RIGHT COL ── */
+.rightCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Code panel — sits between canvas and action bar */
+.codePanel {
+  flex-shrink: 0;
+  padding: 10px 14px 0;
+  background: var(--gb-bg);
+  border-top: 1px solid var(--gb-border);
+}
+
+/* ── ACTION BAR ── */
+.actionBar {
+  flex-shrink: 0;
+  height: var(--gb-actionbar-h);
+  background: var(--gb-s2);
+  border-top: 1px solid var(--gb-border);
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cssStrip {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--gb-font-mono);
+  font-size: 9px;
+  color: var(--gb-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--gb-bg);
+  border: 1px solid var(--gb-border);
+  padding: 7px 10px;
+  border-radius: 4px;
+}
+
+.copyBtn {
+  font-family: var(--gb-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  background: var(--gb-accent);
+  color: #000;
+  text-transform: uppercase;
+  transition: all 0.14s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.copyBtn:hover  { background: #fff; }
+.copyBtn.copied { background: #00cc66; color: #000; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .shell { flex-direction: column; }
+
+  /* Sidebar becomes horizontal scrollable top strip on mobile */
+  .sidebar {
+    width: 100% !important;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: none;
+    border-bottom: 1px solid var(--gb-border);
+    max-height: 220px;
+  }
+
+  .topbarTitle { font-size: 11px; }
+  .tbBtn { padding: 5px 9px; font-size: 9px; }
+
+  .codePanel { padding: 8px 10px 0; }
+}

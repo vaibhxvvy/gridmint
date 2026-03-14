@@ -1,0 +1,36 @@
+.wrap { position: relative; flex-shrink: 0; }
+
+.btn {
+  font-family: var(--gb-font-mono);
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  padding: 8px 14px; border-radius: 5px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  border: 1px solid var(--gb-border); background: var(--gb-s3); color: var(--gb-muted2);
+  transition: all .14s; white-space: nowrap; text-transform: uppercase;
+}
+.btn:hover { border-color: var(--gb-accent); color: var(--gb-accent); }
+.caret { font-size: 9px; opacity: .7; }
+
+.drop {
+  position: fixed; z-index: 999;
+  background: var(--gb-s2); border: 1px solid var(--gb-border);
+  border-radius: 6px; overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0,0,0,.7);
+}
+
+.opt {
+  width: 100%; font-family: var(--gb-font-mono); font-size: 10px;
+  color: var(--gb-muted2); padding: 9px 13px; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  border: none; border-bottom: 1px solid var(--gb-border);
+  background: transparent; text-align: left;
+  transition: background .1s, color .1s;
+}
+.opt:last-child { border-bottom: none; }
+.opt:hover { background: var(--gb-s3); color: var(--gb-accent); }
+
+.badge {
+  font-size: 7px; background: var(--gb-s3);
+  border: 1px solid var(--gb-border); padding: 1px 5px;
+  border-radius: 3px; color: var(--gb-muted); flex-shrink: 0;
+}

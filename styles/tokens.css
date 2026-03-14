@@ -1,0 +1,48 @@
+/* ═══════════════════════════════════════
+   GRIDBOX DESIGN TOKENS
+═══════════════════════════════════════ */
+
+:root {
+  /* Colour */
+  --gb-bg:        #0a0a0a;
+  --gb-surface:   #111111;
+  --gb-s2:        #181818;
+  --gb-s3:        #202020;
+  --gb-border:    #2c2c2c;
+  --gb-accent:    #c8ff00;
+  --gb-accent-dim: rgba(200,255,0,0.10);
+  --gb-text:      #f0f0f0;
+  --gb-muted:     #606060;
+  --gb-muted2:    #999999;
+  --gb-danger:    #ff5555;
+
+  /* Typography */
+  --gb-font-mono: 'Space Mono', 'Courier New', monospace;
+  --gb-font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Spacing scale */
+  --gb-space-1: 4px;
+  --gb-space-2: 8px;
+  --gb-space-3: 12px;
+  --gb-space-4: 16px;
+  --gb-space-5: 20px;
+  --gb-space-6: 24px;
+  --gb-space-8: 32px;
+
+  /* Radii */
+  --gb-radius-sm: 4px;
+  --gb-radius-md: 6px;
+  --gb-radius-lg: 10px;
+
+  /* Transitions */
+  --gb-ease: 0.14s ease;
+
+  /* Sidebar width */
+  --gb-sidebar-w: 260px;
+
+  /* Topbar height */
+  --gb-topbar-h: 44px;
+
+  /* Action bar height */
+  --gb-actionbar-h: 52px;
+}
