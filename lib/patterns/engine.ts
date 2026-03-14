@@ -48,8 +48,9 @@ export const PATTERNS: Pattern[] = [
   // ── NOISE ──
   {
     id: 'noise', name: 'Noise',
-    draw(ctx, { bgColor, patColor, opacity }) {
+    draw(ctx, { patColor, opacity }) {
       const W = ctx.canvas.width, H = ctx.canvas.height;
+      if (!W || !H) return; // guard against zero dimensions
       const [r, g, b] = hexToRgb(patColor);
       const a = opacity / 100;
       const off = document.createElement('canvas');
@@ -368,6 +369,7 @@ export function drawPattern(
   state: PatternState,
   extMult = 5,
 ) {
+  if (!ctx.canvas.width || !ctx.canvas.height) return; // never draw on unsized canvas
   const pat = PATTERNS.find(p => p.id === state.pattern);
   if (!pat) return;
   pat.draw(ctx, state, extMult);

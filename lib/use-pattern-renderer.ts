@@ -34,20 +34,19 @@ export function usePatternRenderer(): UsePatternRendererReturn {
   // ── draw main preview ──────────────────────────────────────────────
   const drawPreview = useCallback((s: PatternState) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !canvas.width || !canvas.height) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = s.bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // extMult=5 for preview — full coverage
     drawPattern(ctx, s, 5);
   }, []);
 
   // ── draw single thumb ─────────────────────────────────────────────
   const drawThumb = useCallback((patId: string, s: PatternState) => {
     const canvas = thumbRefs.current[patId];
-    if (!canvas) return;
+    if (!canvas || !canvas.width || !canvas.height) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const pat = PATTERNS.find(p => p.id === patId);
