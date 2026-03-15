@@ -128,13 +128,13 @@
   color: var(--gb-muted);
 }
 
-/* CTA Stack — all equal width, single column */
+/* CTA Grid — desktop: 2 col, mobile: single stack */
 .ctaGrid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   width: 100%;
-  max-width: 360px;
+  max-width: 440px;
 }
 
 .ctaOutline {
@@ -149,7 +149,6 @@
   text-align: center;
   transition: border-color 0.14s, color 0.14s, background 0.14s;
   background: transparent;
-  width: 100%;
 }
 .ctaOutline:hover {
   border-color: var(--gb-accent);
@@ -170,7 +169,10 @@
   text-decoration: none;
   text-align: center;
   transition: background 0.14s, color 0.14s;
-  width: 100%;
+}
+.ctaFilled:hover {
+  background: #fff;
+  border-color: #fff;
 }
 .ctaFilled:hover {
   background: #fff;
@@ -277,7 +279,11 @@
   .hero { padding: 40px 20px 30px; gap: 20px; }
   .headline { font-size: clamp(26px, 8vw, 40px); }
   .sub { font-size: 14px; }
-  .ctaGrid { grid-template-columns: 1fr 1fr; max-width: 100%; }
+  .ctaGrid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+  .ctaOutline, .ctaFilled { width: 100%; }
 
   /* Preview strip — 2 cols on mobile */
   .previewStrip { display: grid; grid-template-columns: repeat(2, 1fr); }
