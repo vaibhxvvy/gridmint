@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePatternRenderer }           from '@/lib/use-pattern-renderer';
 import { getCSS, PATTERNS }             from '@/lib/patterns/engine';
 import { decodeState }                  from '@/lib/url-state';
-import { PRESETS }                      from '@/lib/patterns/presets';
 import { GeneratorSidebar }             from '@/components/generator/GeneratorSidebar';
 import { GeneratorCanvas }              from '@/components/generator/GeneratorCanvas';
 import { CodeOutput }                   from '@/components/generator/CodeOutput';
@@ -14,7 +13,7 @@ import { Toast }                        from '@/components/ui/Toast';
 import styles from './GeneratorApp.module.css';
 
 export default function GeneratorApp() {
-  const { state, setState, canvasRef, thumbRefs, resetState } = usePatternRenderer();
+  const { state, setState, canvasRef, thumbRefs, resetState, redraw } = usePatternRenderer();
   const [badge,     setBadge]    = useState('');
   const [toast,     setToast]    = useState({ visible: false, msg: '' });
   const [copiedCSS, setCopied]   = useState(false);
@@ -35,7 +34,9 @@ export default function GeneratorApp() {
 
   const handleResize = useCallback((w: number, h: number) => {
     setBadge(`${w} × ${h}  16:9`);
-  }, []);
+    // Canvas dims were just reset — redraw immediately
+    requestAnimationFrame(() => redraw());
+  }, [redraw]);
 
   const handleShare = useCallback(() => {
     navigator.clipboard.writeText(window.location.href)
@@ -50,10 +51,17 @@ export default function GeneratorApp() {
   }, [state]);
 
   const handleRandomize = useCallback(() => {
-    // pick a random preset then randomize size/opacity/rotation slightly
-    const preset = PRESETS[Math.floor(Math.random() * PRESETS.length)];
+    const randomHex = () => '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+    // pick dark bg (low brightness) and bright pattern color
+    const hue = Math.floor(Math.random() * 360);
+    const bgColor  = `hsl(${hue}, ${Math.floor(Math.random()*30)}%, ${Math.floor(Math.random()*15 + 3)}%)`;
+    const patColor = `hsl(${(hue + 120 + Math.floor(Math.random()*120)) % 360}, ${Math.floor(Math.random()*60+40)}%, ${Math.floor(Math.random()*40+50)}%)`;
+    const patIds = PATTERNS.map(p => p.id);
+    const pattern = patIds[Math.floor(Math.random() * patIds.length)];
     setState({
-      ...preset.state,
+      pattern,
+      bgColor,
+      patColor,
       size:      Math.floor(Math.random() * 40) + 8,
       opacity:   Math.floor(Math.random() * 50) + 10,
       thickness: Math.floor(Math.random() * 3) + 1,
@@ -89,7 +97,6 @@ export default function GeneratorApp() {
       {/* TOPBAR */}
       <header className={styles.topbar}>
         <Link href="/" className={styles.topbarLogo}>gridmint</Link>
-        <span className={styles.topbarTitle}>Gridmint</span>
         <div className={styles.topbarActions}>
           <button className={`${styles.tbBtn} ${styles.tbRandom}`} onClick={handleRandomize} title="Randomize (X)">
             ✦ random
@@ -99,7 +106,7 @@ export default function GeneratorApp() {
           </button>
           <a
             className={`${styles.tbBtn} ${styles.tbGithub}`}
-            href="https://github.com/vaibhav/gridmint"
+            href="https://github.com/vaibhxvvy/gridbox"
             target="_blank"
             rel="noopener noreferrer"
           >

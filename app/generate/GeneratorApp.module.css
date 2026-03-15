@@ -18,34 +18,24 @@
   border-bottom: 1px solid var(--gb-border);
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding: 0 16px;
   position: relative;
   flex-shrink: 0;
 }
 
 .topbarLogo {
-  position: absolute;
-  left: 16px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--gb-accent);
   letter-spacing: 0.1em;
   text-decoration: none;
   transition: opacity 0.14s;
+  flex-shrink: 0;
 }
 .topbarLogo:hover { opacity: 0.75; }
 
-.topbarTitle {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gb-text);
-}
-
 .topbarActions {
-  position: absolute;
-  right: 14px;
+  margin-left: auto;
   display: flex;
   gap: 8px;
   align-items: center;
@@ -56,7 +46,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.07em;
-  padding: 6px 13px;
+  padding: 7px 14px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.14s;
@@ -102,8 +92,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   min-width: 0;
+  min-height: 0;
 }
 
 /* Code panel — sits between canvas and action bar */
@@ -160,23 +152,70 @@
 .copyBtn:hover  { background: #fff; }
 .copyBtn.copied { background: #00cc66; color: #000; }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  .shell { flex-direction: column; }
+/* ── DESKTOP — right col scrolls if needed ── */
+.rightCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+}
 
-  /* Sidebar becomes horizontal scrollable top strip on mobile */
-  .sidebar {
-    width: 100% !important;
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    border-right: none;
-    border-bottom: 1px solid var(--gb-border);
-    max-height: 220px;
+/* ── RESPONSIVE — TABLET ── */
+@media (max-width: 900px) {
+  .tbBtn { padding: 7px 10px; font-size: 10px; }
+  .cssStrip { display: none; }
+}
+
+/* ── RESPONSIVE — MOBILE (matches sketch) ──
+   Layout: topbar fixed → preview fixed → code tabs+copy →
+           scrollable panel with all controls below
+*/
+@media (max-width: 768px) {
+  .page {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
-  .topbarTitle { font-size: 11px; }
-  .tbBtn { padding: 5px 9px; font-size: 9px; }
+  /* Topbar stays fixed at top */
+  .topbar {
+    flex-shrink: 0;
+    padding: 0 12px;
+    height: 42px;
+  }
+  .topbarLogo { font-size: 13px; }
+  .tbBtn      { padding: 5px 9px; font-size: 10px; }
+  .tbGithub   { display: none; }
+  .tbRandom   { display: none; }
 
-  .codePanel { padding: 8px 10px 0; }
+  /* Shell stacks vertically */
+  .shell {
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* Right col: preview + code fixed on top, action bar fixed, sidebar scrolls */
+  .rightCol {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* Code panel compact */
+  .codePanel { padding: 6px 10px 0; }
+
+  /* Action bar compact */
+  .actionBar { height: auto; padding: 8px 10px; gap: 8px; }
+  .copyBtn   { padding: 7px 12px; font-size: 10px; }
+  .cssStrip  { display: none; }
+
+  /* Sidebar below everything — scrollable */
+  /* GeneratorSidebar.module.css handles the rest */
 }

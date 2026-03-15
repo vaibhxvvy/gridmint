@@ -11,12 +11,12 @@
 }
 
 .label {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--gb-muted);
   letter-spacing: 0.06em;
 }
 
 .value {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--gb-accent);
 }

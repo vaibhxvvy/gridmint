@@ -1,0 +1,32 @@
+{
+  "name": "gridmint",
+  "version": "0.1.0",
+  "description": "CSS background pattern generator — React components and CSS utilities for 12 patterns",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./css": "./dist/gridmint.css"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --out-dir dist"
+  },
+  "keywords": ["css", "background", "pattern", "react", "nextjs", "design", "gridmint"],
+  "author": "Vaibhav",
+  "license": "SEE LICENSE IN LICENSE",
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "@types/react": "^18.0.0"
+  }
+}

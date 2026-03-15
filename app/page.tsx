@@ -53,14 +53,15 @@ const PREVIEW_PATTERNS = [
     bgSize: '14px 14px', bgPos: '',
   },
   {
-    id: 'carbon', name: 'Carbon', bg: '#111111',
+    id: 'circuit', name: 'Circuit', bg: '#061010',
+    // Circuit uses a dot-grid approximation for the landing page preview
+    // (actual circuit needs canvas — this gives the right vibe)
     bgImage: [
-      'linear-gradient(135deg,rgba(255,255,255,0.08) 25%,transparent 25%)',
-      'linear-gradient(225deg,rgba(255,255,255,0.08) 25%,transparent 25%)',
-      'linear-gradient(315deg,rgba(255,255,255,0.08) 25%,transparent 25%)',
-      'linear-gradient(45deg, rgba(255,255,255,0.08) 25%,transparent 25%)',
+      'radial-gradient(circle, rgba(0,221,170,0.5) 1px, transparent 1px)',
+      'linear-gradient(rgba(0,221,170,0.07) 1px, transparent 1px)',
+      'linear-gradient(90deg, rgba(0,221,170,0.07) 1px, transparent 1px)',
     ].join(','),
-    bgSize: '8px 8px', bgPos: '-4px 0, -4px 0, 0 0, 0 0',
+    bgSize: '24px 24px, 24px 24px, 24px 24px', bgPos: '12px 12px, 0 0, 0 0',
   },
   {
     id: 'plus', name: 'Plus', bg: '#0a1a0a',
@@ -88,15 +89,23 @@ export default function LandingPage() {
       {/* NAV */}
       <nav className={styles.nav}>
         <span className={styles.navLogo} style={{ color: tc }}>gridmint</span>
-        <a
-          className={styles.navGithub}
-          href="https://github.com/vaibhxvvy/gridbox"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={isActive ? { borderColor: withAlpha(tc, 0.5), color: tc } : {}}
-        >
-          ★ stars on github
-        </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <Link href="/install" style={{ fontFamily: 'var(--gb-font-mono)', fontSize: '11px', color: 'var(--gb-muted2)', textDecoration: 'none', letterSpacing: '0.08em' }}>
+            install
+          </Link>
+          <Link href="/generate" style={{ fontFamily: 'var(--gb-font-mono)', fontSize: '11px', color: 'var(--gb-muted2)', textDecoration: 'none', letterSpacing: '0.08em' }}>
+            generator
+          </Link>
+          <a
+            className={styles.navGithub}
+            href="https://github.com/vaibhxvvy/gridbox"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={isActive ? { borderColor: withAlpha(tc, 0.5), color: tc } : {}}
+          >
+            ★ stars on github
+          </a>
+        </div>
       </nav>
 
       {/* HERO */}

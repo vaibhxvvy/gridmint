@@ -9,6 +9,27 @@
   background: var(--gb-surface);
 }
 
+/* Mobile: sidebar becomes compact scrollable panel below canvas */
+@media (max-width: 640px) {
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: none;
+    border-top: 1px solid var(--gb-border);
+    height: 200px;
+    flex-shrink: 0;
+  }
+  .section {
+    min-width: 180px;
+    border-bottom: none;
+    border-right: 1px solid var(--gb-border);
+    flex-shrink: 0;
+  }
+  .section:last-child { border-right: none; }
+}
+
 .section {
   padding: 12px;
   border-bottom: 1px solid var(--gb-border);
@@ -16,7 +37,7 @@
 
 .sectionTitle {
   font-family: var(--gb-font-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.2em;
   color: var(--gb-muted2);
   text-transform: uppercase;

@@ -1,4 +1,4 @@
-import type { Pattern, PatternState } from '@/types/pattern';
+import type { Pattern, PatternState } from './types';
 
 // ── utils ────────────────────────────────────────────────────────────
 export function hexToRgb(hex: string): [number, number, number] {
@@ -123,7 +123,7 @@ export const PATTERNS: Pattern[] = [
 
   // ── RECT ──
   {
-    id: 'rect', name: 'Rectangle',
+    id: 'rect', name: 'Rect',
     draw(ctx, { patColor, opacity, size, thickness, rotation }, extMult = 5) {
       const W = ctx.canvas.width, H = ctx.canvas.height;
       const [r, g, b] = hexToRgb(patColor);
