@@ -1,10 +1,9 @@
-/* ── DESKTOP ── fills parent codePanel (flex:1) */
+/* ── DESKTOP ── fills parent codePanel */
 .wrap {
   display: flex;
   flex-direction: column;
-  height: 100%;
   background: var(--gb-bg);
-  border-top: 1px solid var(--gb-border);
+  position: relative;
 }
 
 .toolbar {
@@ -13,6 +12,8 @@
   border-bottom: 1px solid var(--gb-border);
   background: var(--gb-s2);
   flex-shrink: 0;
+  position: relative;
+  z-index: 10; /* ensure dropdown renders above code block */
 }
 
 /* Desktop: show tabs */

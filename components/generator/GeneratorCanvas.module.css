@@ -1,18 +1,28 @@
-/* ── DESKTOP ── */
+/* ── DESKTOP ──
+   The area must flex-shrink so the code panel always gets space.
+   Canvas scales to fill available space at 16:9.
+*/
 .area {
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #050505;
-  padding: 16px;
+  padding: 12px;
+  overflow: hidden;
 }
 
 .box {
   position: relative;
-  box-shadow: 0 0 0 1px var(--gb-border), 0 8px 32px rgba(0,0,0,0.8);
+  box-shadow: 0 0 0 1px var(--gb-border), 0 4px 24px rgba(0,0,0,0.8);
   overflow: hidden;
-  flex-shrink: 0;
+  /* Keep 16:9 but constrain to available space */
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 16 / 9;
+  /* Width drives size, height follows aspect ratio */
+  width: 100%;
 }
 
 .animBorder {
@@ -21,11 +31,8 @@
 
 .canvas {
   display: block;
-  /* Scale canvas to fit the available space while keeping 16:9 */
   width: 100%;
-  height: auto;
-  max-width: 1280px;
-  aspect-ratio: 16 / 9;
+  height: 100%;
 }
 
 .badge {
@@ -42,33 +49,26 @@
   padding: 2px 8px; border-radius: 3px; pointer-events: none;
 }
 
-/* ── MOBILE ── full width, 16:9, lime green border top+bottom */
+/* ── MOBILE ── */
 @media (max-width: 768px) {
   .area {
+    flex: none;
+    flex-shrink: 0;
     padding: 0;
     width: 100%;
     background: #000;
-    flex-shrink: 0;
-    display: block; /* no centering flex — just full width */
+    display: block;
   }
-
   .box {
     width: 100%;
+    aspect-ratio: 16 / 9;
     box-shadow: none;
-    /* Lime green border exactly as per sketch */
     outline: 2px solid var(--gb-accent);
     outline-offset: -2px;
   }
-
   .animBorder {
     outline: 2px solid var(--gb-accent);
     box-shadow: 0 0 12px rgba(200,255,0,0.2);
   }
-
-  .canvas {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    display: block;
-  }
+  .canvas { width: 100%; height: 100%; }
 }

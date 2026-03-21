@@ -15,51 +15,26 @@ interface Props {
 }
 
 export function GeneratorCanvas({ canvasRef, onResize, badgeText, state }: Props) {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const didInit = useRef(false);
+  const boxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const setSize = (w: number, h: number) => {
-      if (canvas.width === w && canvas.height === h) return;
-      canvas.width  = w;
-      canvas.height = h;
-      onResize(w, h);
-    };
-
-    const ro = new ResizeObserver(() => {
-      const wrap = wrapRef.current;
-      if (!wrap) return;
-      if (window.innerWidth <= 768) {
-        const w = wrap.clientWidth;
-        setSize(w, Math.round(w * 9 / 16));
-      } else if (!didInit.current) {
-        didInit.current = true;
-        setSize(CANVAS_W, CANVAS_H);
-      }
-    });
-
-    const wrap = wrapRef.current;
-    if (wrap) ro.observe(wrap);
-
-    if (window.innerWidth <= 768) {
-      const w = wrap?.clientWidth ?? CANVAS_W;
-      setSize(w, Math.round(w * 9 / 16));
-    } else {
-      didInit.current = true;
-      setSize(CANVAS_W, CANVAS_H);
+    // Always set the internal canvas resolution to 1280x720
+    // The CSS handles display scaling via width:100% on the canvas element
+    if (canvas.width !== CANVAS_W || canvas.height !== CANVAS_H) {
+      canvas.width  = CANVAS_W;
+      canvas.height = CANVAS_H;
+      onResize(CANVAS_W, CANVAS_H);
     }
-
-    return () => ro.disconnect();
   }, [canvasRef, onResize]);
 
   const isAnimating = state.animation !== 'none';
 
   return (
-    <div className={styles.area} ref={wrapRef}>
-      <div className={`${styles.box} ${isAnimating ? styles.animBorder : ''}`}>
+    <div className={styles.area}>
+      <div ref={boxRef} className={`${styles.box} ${isAnimating ? styles.animBorder : ''}`}>
         <canvas
           ref={canvasRef}
           width={CANVAS_W}
@@ -67,9 +42,7 @@ export function GeneratorCanvas({ canvasRef, onResize, badgeText, state }: Props
           className={styles.canvas}
         />
         {badgeText && !isAnimating && <div className={styles.badge}>{badgeText}</div>}
-        {isAnimating && (
-          <div className={styles.animLabel}>{state.animation} ⟳</div>
-        )}
+        {isAnimating && <div className={styles.animLabel}>{state.animation} ⟳</div>}
       </div>
     </div>
   );

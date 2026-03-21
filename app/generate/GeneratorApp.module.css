@@ -107,13 +107,13 @@
 .infoAnim { color: var(--gb-accent); font-size: 10px; }
 .infoRight { margin-left: auto; font-size: 10px; white-space: nowrap; }
 
-/* Code panel — fills all remaining space */
+/* Code panel — always visible, fixed height */
 .codePanel {
-  flex: 1;
-  min-height: 0;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  position: relative;
+  z-index: 5;
 }
 
 /* ══════════════════════════════════════════════════
