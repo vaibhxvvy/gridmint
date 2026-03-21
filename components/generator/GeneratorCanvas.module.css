@@ -1,57 +1,107 @@
-/*
-  LAYOUT LOGIC:
-  - .stage fills available viewport height (calc-based)
-  - .frame is centered inside stage, keeps its aspect ratio
-  - For 16:9: width fills stage, height follows ratio. If height > stage height, 
-    then height=100% and width follows ratio instead.
-  - For phone 9:16: portrait box, height fills stage, width follows ratio.
-  - For custom: same as 16:9 but with custom ratio.
-  
-  The key CSS trick: width:100% + max-height:100% + aspect-ratio on the frame.
-  The browser will pick the smaller of the two constraints automatically.
-*/
-
-/* Stage — fills viewport minus fixed chrome heights */
+/* Stage — full viewport height minus topbar(48) + infobar(32) = 80px */
 .stage {
   width: 100%;
-  height: calc(100vh - 48px - 41px - 32px);
-  min-height: 180px;
+  height: calc(100vh - 48px - 32px);
+  min-height: 200px;
   background: #050505;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding: 12px;
+  padding: 14px;
   box-sizing: border-box;
+  position: relative;
 }
 
-/* Frame — aspect ratio box that fits inside the stage */
+/* Layout toggle — floating pill group top-left inside the stage */
+.layoutOverlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10;
+}
+
+.layoutPills {
+  display: flex;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid var(--gb-border);
+  border-radius: 6px;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+
+.layoutPill {
+  font-family: var(--gb-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  color: var(--gb-muted2);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  border-right: 1px solid var(--gb-border);
+}
+.layoutPill:last-child { border-right: none; }
+.layoutPill:hover { color: var(--gb-text); background: rgba(255,255,255,0.06); }
+.layoutPillActive { color: var(--gb-accent) !important; background: rgba(200,255,0,0.1) !important; }
+
+.customInputs {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid var(--gb-border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  backdrop-filter: blur(8px);
+}
+
+.ratioInput {
+  width: 36px;
+  font-family: var(--gb-font-mono);
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  color: var(--gb-text);
+  text-align: center;
+  outline: none;
+  padding: 2px 0;
+}
+.ratioInput::placeholder { color: var(--gb-muted); }
+
+.ratioSep {
+  color: var(--gb-muted);
+  font-size: 12px;
+  font-family: var(--gb-font-mono);
+}
+
+/* Pattern frame — centered in stage, aspect-ratio driven */
 .frame {
   position: relative;
   overflow: hidden;
   box-shadow: 0 0 0 1px var(--gb-border);
-  /* Width fills stage, height follows aspect-ratio, capped at stage height */
-  width: 100%;
-  max-height: 100%;
-  /* aspect-ratio is set via inline style from props */
-}
-
-/* Phone mode: height fills stage, width follows 9:16 */
-.framePhone {
-  width: auto;
+  /* Height fills stage, width follows aspect ratio */
   height: 100%;
-  aspect-ratio: 9 / 16;
-  max-height: 100%;
+  max-width: 100%;
+  /* aspect-ratio set via inline style */
 }
 
 .animBorder {
   box-shadow: 0 0 0 2px var(--gb-accent), 0 0 16px rgba(200,255,0,0.12);
 }
 
+/* Canvas scales to fill frame using object-fit:fill (frame IS the display ratio) */
 .canvas {
   display: block;
   width: 100%;
   height: 100%;
+  /* object-fit not needed — the frame's aspect-ratio handles the shape,
+     canvas stretches to fill it (1280x720 internal res, any display ratio) */
 }
 
 .animLabel {
@@ -62,7 +112,7 @@
   padding: 2px 8px; border-radius: 3px; pointer-events: none;
 }
 
-/* Mobile — full width, no padding */
+/* Mobile */
 @media (max-width: 768px) {
   .stage {
     height: auto;
@@ -73,5 +123,8 @@
     outline: 2px solid var(--gb-accent);
     outline-offset: -2px;
     box-shadow: none;
+    height: 100%;
   }
+  .layoutOverlay { top: 6px; left: 6px; }
+  .layoutPill { font-size: 9px; padding: 4px 7px; }
 }

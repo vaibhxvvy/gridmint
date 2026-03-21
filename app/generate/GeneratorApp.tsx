@@ -134,8 +134,6 @@ export default function GeneratorApp() {
 
   const wParsed = Math.max(1, parseInt(customW) || 16);
   const hParsed = Math.max(1, parseInt(customH) || 9);
-  const isPhone = previewLayout === 'phone';
-  const aspectRatio = previewLayout === 'custom' ? `${wParsed}/${hParsed}` : '16/9';
 
   const infoText = [
     state.pattern.charAt(0).toUpperCase() + state.pattern.slice(1),
@@ -195,38 +193,20 @@ export default function GeneratorApp() {
         />
 
         <div className={styles.rightCol}>
-          {/* Layout bar */}
-          <div className={styles.layoutBar}>
-            <select className={styles.layoutSelect} value={previewLayout} onChange={e => setPreviewLayout(e.target.value as PreviewLayout)}>
-              <option value="16:9">Web View 16:9</option>
-              <option value="phone">Phone View</option>
-              <option value="custom">Custom Ratio</option>
-            </select>
-            <AnimatePresence>
-              {previewLayout === 'custom' && (
-                <motion.div
-                  className={styles.customRatio}
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={{    opacity: 0, width: 0 }}
-                  transition={{ duration: 0.18 }}
-                  style={{ overflow: 'hidden' }}
-                >
-                  <input type="text" value={customW} onChange={e => setCustomW(e.target.value)} className={styles.ratioInput} placeholder="16" maxLength={3}/>
-                  <span className={styles.ratioSep}>:</span>
-                  <input type="text" value={customH} onChange={e => setCustomH(e.target.value)} className={styles.ratioInput} placeholder="9" maxLength={3}/>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
 
-          {/* Canvas — stage handles its own 16:9 sizing */}
+          {/* Canvas — layout toggle lives inside the stage as overlay */}
           <GeneratorCanvas
             canvasRef={canvasRef}
             onResize={() => requestAnimationFrame(() => redraw())}
             state={state}
-            aspectRatio={aspectRatio}
-            phoneMode={isPhone}
+            layout={previewLayout}
+            customW={wParsed}
+            customH={hParsed}
+            onLayoutChange={setPreviewLayout}
+            onCustomW={setCustomW}
+            onCustomH={setCustomH}
+            customWStr={customW}
+            customHStr={customH}
           />
 
           {/* Info bar */}
@@ -236,7 +216,7 @@ export default function GeneratorApp() {
               <span className={styles.infoSwatch} style={{ background: state.bgColor }} />
               <span className={styles.infoSwatch} style={{ background: state.patColor }} />
               <span className={styles.infoDims}>
-                {isPhone ? '9:16' : previewLayout === 'custom' ? `${wParsed}:${hParsed}` : '16:9'}
+                {previewLayout === 'phone' ? '9:16' : previewLayout === 'custom' ? `${wParsed}:${hParsed}` : '16:9'}
               </span>
               <AnimatePresence>
                 {isAnimating && (
