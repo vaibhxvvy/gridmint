@@ -118,7 +118,6 @@ export function usePatternRenderer(): UsePatternRendererReturn {
   }, []);
 
   // ── draw preview using tile cache ─────────────────────────────────
-  // ox, oy: current scroll offset in pixels
   const drawPreview = useCallback((s: PatternState, ox = 0, oy = 0) => {
     const canvas = canvasRef.current;
     if (!canvas || !canvas.width || !canvas.height) return;
@@ -130,25 +129,28 @@ export function usePatternRenderer(): UsePatternRendererReturn {
     ctx.fillStyle = s.bgColor;
     ctx.fillRect(0, 0, W, H);
 
-    if (ox === 0 && oy === 0) {
-      // Static — direct draw at full quality
+    // Noise: always redraw fresh — the random flicker IS the animation
+    // The 256px grain tile in engine.ts makes this fast enough for 60fps
+    if (s.pattern === 'noise') {
       drawPattern(ctx, s, 5, 0, 0);
       return;
     }
 
-    // Animated — use tile cache
+    if (ox === 0 && oy === 0) {
+      drawPattern(ctx, s, 5, 0, 0);
+      return;
+    }
+
+    // All other patterns: use tile cache — draw once, translate per frame
     const key = stateKey(s);
     if (!tileCache.current || tileCache.current.stateKey !== key) {
       tileCache.current = buildTile(s, W, H);
     }
 
     const { canvas: tile, tileW, tileH } = tileCache.current;
-
-    // Wrap offset to tile size for seamless loop
     const wx = ((ox % tileW) + tileW) % tileW;
     const wy = ((oy % tileH) + tileH) % tileH;
 
-    // Draw tile at 4 positions to cover the canvas seamlessly
     ctx.drawImage(tile, wx - tileW, wy - tileH);
     ctx.drawImage(tile, wx,         wy - tileH);
     ctx.drawImage(tile, wx - tileW, wy);

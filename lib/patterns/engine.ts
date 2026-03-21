@@ -52,23 +52,27 @@ export const PATTERNS: Pattern[] = [
     id: 'noise', name: 'Noise',
     draw(ctx, { patColor, opacity }) {
       const W = ctx.canvas.width, H = ctx.canvas.height;
-      if (!W || !H) return; // guard against zero dimensions
+      if (!W || !H) return;
       const [r, g, b] = hexToRgb(patColor);
       const a = opacity / 100;
-      const off = document.createElement('canvas');
-      off.width = W; off.height = H;
-      const oc = off.getContext('2d')!;
-      const id = oc.createImageData(W, H);
-      const d = id.data;
+      // Small grain tile (256×256) tiled across canvas — 16× fewer pixels,
+      // redrawn every frame for authentic CRT static flicker at 60fps
+      const GRAIN = 256;
+      const grain = document.createElement('canvas');
+      grain.width = GRAIN; grain.height = GRAIN;
+      const gc  = grain.getContext('2d')!;
+      const img = gc.createImageData(GRAIN, GRAIN);
+      const d   = img.data;
+      const al  = Math.round(255 * Math.min(a * 2.5, 1));
       for (let i = 0; i < d.length; i += 4) {
         if (Math.random() < a) {
           const br = Math.random();
-          d[i] = r * br; d[i + 1] = g * br; d[i + 2] = b * br;
-          d[i + 3] = Math.round(255 * Math.min(a * 2.5, 1));
+          d[i] = r * br; d[i+1] = g * br; d[i+2] = b * br; d[i+3] = al;
         }
       }
-      oc.putImageData(id, 0, 0);
-      ctx.drawImage(off, 0, 0);
+      gc.putImageData(img, 0, 0);
+      const pat = ctx.createPattern(grain, 'repeat');
+      if (pat) { ctx.fillStyle = pat; ctx.fillRect(0, 0, W, H); }
     },
     css({ bgColor, patColor, opacity }) {
       const [r, g, b] = hexToRgb(patColor);
