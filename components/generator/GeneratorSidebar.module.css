@@ -92,28 +92,37 @@
   background: var(--gb-accent);
 }
 
-/* Animate direction dropdown */
-.animSelect {
-  width: 100%;
-  font-family: var(--gb-font-mono);
-  font-size: 11px;
-  color: var(--gb-text);
-  background: var(--gb-s2);
-  border: 1px solid var(--gb-border);
-  border-radius: 4px;
-  padding: 8px 28px 8px 10px;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23999'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  outline: none;
-  transition: border-color 0.12s;
+/* Direction button grid */
+.dirGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
 }
-.animSelect:not(:disabled):hover { border-color: var(--gb-accent); }
-.animSelect:disabled { opacity: 0.4; cursor: not-allowed; }
-.animSelect option { background: #1a1a1a; }
+.dirGridDisabled { opacity: 0.35; pointer-events: none; }
+
+.dirBtn {
+  aspect-ratio: 1;
+  border: 1px solid var(--gb-border);
+  border-radius: 5px;
+  background: var(--gb-s2);
+  color: var(--gb-muted2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  padding: 0;
+}
+.dirBtn:not(:disabled):hover {
+  border-color: var(--gb-muted2);
+  color: var(--gb-text);
+  background: var(--gb-s3);
+}
+.dirBtnActive {
+  border-color: var(--gb-accent) !important;
+  color: var(--gb-accent) !important;
+  background: rgba(200,255,0,0.08) !important;
+}
 
 .speedRow {
   display: flex;

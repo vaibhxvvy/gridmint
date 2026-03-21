@@ -1,11 +1,12 @@
-/* Outer area — always 16:9 landscape container, ~90% width (-10% from before) */
+/* Outer area — fills canvasWrap fully */
 .area {
-  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #050505;
-  padding: 14px;
+  padding: 12px;
+  box-sizing: border-box;
 }
 
 /* Phone mode: area stays landscape but shows portrait box centred inside */

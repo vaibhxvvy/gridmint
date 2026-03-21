@@ -129,6 +129,17 @@
 .ratioInput:focus { border-color: var(--gb-accent); }
 .ratioSep { color: var(--gb-muted); font-size: 12px; }
 
+/* Canvas wrap — max-height so code panel is always visible without scrolling */
+.canvasWrap {
+  flex-shrink: 0;
+  max-height: 52vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #050505;
+}
+
 .infoBar {
   flex-shrink: 0;
   height: 32px;
