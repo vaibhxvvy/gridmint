@@ -96,13 +96,12 @@
   box-shadow: 0 0 0 2px var(--gb-accent), 0 0 16px rgba(200,255,0,0.12);
 }
 
-/* Canvas scales to fill frame using object-fit:fill (frame IS the display ratio) */
+/* Canvas always 1920x1080 internally — object-fit:cover crops to frame ratio */
 .canvas {
   display: block;
   width: 100%;
   height: 100%;
-  /* object-fit not needed — the frame's aspect-ratio handles the shape,
-     canvas stretches to fill it (1280x720 internal res, any display ratio) */
+  object-fit: cover;
 }
 
 .animLabel {

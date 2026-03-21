@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import type { PatternState } from '@/types/pattern';
 import styles from './GeneratorCanvas.module.css';
 
-const CANVAS_W = 1280;
-const CANVAS_H = 720;
+const CANVAS_W = 1920;
+const CANVAS_H = 1080;
 
 type PreviewLayout = '16:9' | 'phone' | 'custom';
 

@@ -1,4 +1,4 @@
-.block { display: flex; flex-direction: column; gap: 4px; position: relative; }
+.block { display: flex; flex-direction: column; gap: 4px; }
 
 .row {
   display: flex;
@@ -40,20 +40,21 @@
 
 /* ── PICKER POPUP ── */
 .picker {
-  position: absolute;
-  bottom: calc(100% + 6px);
+  position: static;
+  bottom: auto;
   top: auto;
-  left: 0;
-  width: 220px;
-  background: #1a1a1a;
+  left: auto;
+  width: 100%;
+  background: var(--gb-s3);
   border: 1px solid var(--gb-border);
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  z-index: 200;
-  box-shadow: 0 -8px 40px rgba(0,0,0,0.8);
+  z-index: 1;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   gap: 0;
+  margin-top: 4px;
 }
 
 /* Saturation/Brightness square */

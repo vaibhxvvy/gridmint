@@ -147,10 +147,11 @@ export function ColorPicker({ label, value, onChange }: Props) {
         {open && (
           <motion.div
             className={styles.picker}
-            initial={{ opacity: 0, y: -6, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0,  scale: 1    }}
-            exit={{    opacity: 0, y: -6, scale: 0.97 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{    opacity: 0, height: 0 }}
+            transition={{ duration: 0.18, ease: 'easeInOut' }}
+            style={{ overflow: 'hidden' }}
           >
             {/* SB square — background is the pure hue, white+black gradients overlay */}
             <div
