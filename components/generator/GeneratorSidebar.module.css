@@ -115,7 +115,29 @@
 .animSelect:disabled { opacity: 0.4; cursor: not-allowed; }
 .animSelect option { background: #1a1a1a; }
 
-.speedRow { margin-top: 2px; }
+.speedRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.speedRow > :first-child { flex: 1; }
+
+.playPauseBtn {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 1px solid var(--gb-border);
+  border-radius: 4px;
+  background: var(--gb-s2);
+  color: var(--gb-muted2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+.playPauseBtn:hover { border-color: var(--gb-accent); color: var(--gb-accent); }
+.playPauseBtnActive { border-color: var(--gb-accent); color: var(--gb-accent); background: rgba(200,255,0,0.08); }
 
 /* Colors */
 .colorStack { display: flex; flex-direction: column; gap: 8px; }

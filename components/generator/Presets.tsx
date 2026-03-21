@@ -32,15 +32,7 @@ export function Presets({ state, onSelect }: Props) {
         <button
           key={p.name}
           className={styles.row}
-          onClick={() => onSelect({
-            // Apply colours and adjustments but keep current pattern
-            bgColor:   p.state.bgColor,
-            patColor:  p.state.patColor,
-            size:      p.state.size,
-            opacity:   p.state.opacity,
-            thickness: p.state.thickness,
-            rotation:  p.state.rotation,
-          })}
+          onClick={() => onSelect(p.state)}
           title={`Apply ${p.name}`}
         >
           <PresetThumb preset={p} />

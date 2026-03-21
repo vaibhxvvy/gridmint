@@ -1,22 +1,37 @@
+/* Outer area — always 16:9 landscape container, ~90% width (-10% from before) */
 .area {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #050505;
-  padding: 16px;
+  padding: 14px;
 }
 
+/* Phone mode: area stays landscape but shows portrait box centred inside */
+.areaPhone {
+  aspect-ratio: 16 / 9;
+  padding: 12px;
+}
+
+/* The pattern box */
 .box {
   position: relative;
-  box-shadow: 0 0 0 1px var(--gb-border), 0 4px 24px rgba(0,0,0,0.7);
+  box-shadow: 0 0 0 1px var(--gb-border), 0 4px 20px rgba(0,0,0,0.7);
   overflow: hidden;
-  max-width: 100%;
   width: 100%;
 }
 
+/* Phone mode: portrait box centred, ~45% width of the landscape area */
+.boxPhone {
+  width: auto;
+  height: 100%;
+  aspect-ratio: 9 / 16;
+  max-height: 100%;
+}
+
 .animBorder {
-  box-shadow: 0 0 0 2px var(--gb-accent), 0 0 16px rgba(200,255,0,0.12);
+  box-shadow: 0 0 0 2px var(--gb-accent), 0 0 14px rgba(200,255,0,0.1);
 }
 
 .canvas {

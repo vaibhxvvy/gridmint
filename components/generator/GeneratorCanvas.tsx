@@ -11,11 +11,12 @@ interface Props {
   canvasRef:    React.RefObject<HTMLCanvasElement | null>;
   onResize:     (w: number, h: number) => void;
   state:        PatternState;
-  aspectRatio?: string; // e.g. '16/9', '9/16', '4/3'
+  aspectRatio?: string;
+  phoneMode?:   boolean;
   badgeText?:   string;
 }
 
-export function GeneratorCanvas({ canvasRef, onResize, state, aspectRatio = '16/9', badgeText }: Props) {
+export function GeneratorCanvas({ canvasRef, onResize, state, aspectRatio = '16/9', phoneMode, badgeText }: Props) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -29,10 +30,11 @@ export function GeneratorCanvas({ canvasRef, onResize, state, aspectRatio = '16/
   const isAnimating = state.animation !== 'none';
 
   return (
-    <div className={styles.area}>
+    /* Outer area: always 16:9 landscape — phone mode pads inside */
+    <div className={`${styles.area} ${phoneMode ? styles.areaPhone : ''}`}>
       <div
-        className={`${styles.box} ${isAnimating ? styles.animBorder : ''}`}
-        style={{ aspectRatio }}
+        className={`${styles.box} ${isAnimating ? styles.animBorder : ''} ${phoneMode ? styles.boxPhone : ''}`}
+        style={!phoneMode ? { aspectRatio } : undefined}
       >
         <canvas
           ref={canvasRef}

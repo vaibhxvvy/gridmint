@@ -19,13 +19,15 @@ const ANIM_DIRS: { id: AnimationDir; label: string }[] = [
 ];
 
 interface Props {
-  state:     PatternState;
-  thumbRefs: React.MutableRefObject<Record<string, HTMLCanvasElement | null>>;
-  onChange:  (patch: Partial<PatternState>, activeOnly?: boolean) => void;
-  onReset:   () => void;
+  state:       PatternState;
+  thumbRefs:   React.MutableRefObject<Record<string, HTMLCanvasElement | null>>;
+  onChange:    (patch: Partial<PatternState>, activeOnly?: boolean) => void;
+  onReset:     () => void;
+  playing:     boolean;
+  onPlayPause: () => void;
 }
 
-export function GeneratorSidebar({ state, thumbRefs, onChange, onReset }: Props) {
+export function GeneratorSidebar({ state, thumbRefs, onChange, onReset, playing, onPlayPause }: Props) {
   const [patternsOpen, setPatternsOpen] = useState(true);
   const [presetsOpen,  setPresetsOpen]  = useState(false);
 
@@ -95,7 +97,7 @@ export function GeneratorSidebar({ state, thumbRefs, onChange, onReset }: Props)
           ))}
         </select>
 
-        {/* Speed slider — only when animating */}
+        {/* Speed + play/pause row — only when animating */}
         {animOn && (
           <div className={styles.speedRow}>
             <Slider
@@ -106,6 +108,21 @@ export function GeneratorSidebar({ state, thumbRefs, onChange, onReset }: Props)
               unit=""
               onChange={v => onChange({ animSpeed: v })}
             />
+            <button
+              className={`${styles.playPauseBtn} ${playing ? styles.playPauseBtnActive : ''}`}
+              onClick={onPlayPause}
+              title="Play / Pause (Space)"
+            >
+              {playing ? (
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+                </svg>
+              ) : (
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              )}
+            </button>
           </div>
         )}
       </div>

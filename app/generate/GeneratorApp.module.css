@@ -129,7 +129,6 @@
 .ratioInput:focus { border-color: var(--gb-accent); }
 .ratioSep { color: var(--gb-muted); font-size: 12px; }
 
-/* Info bar */
 .infoBar {
   flex-shrink: 0;
   height: 32px;
@@ -145,8 +144,24 @@
   overflow: hidden;
 }
 .infoText { letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.infoSwatches { display: flex; gap: 5px; flex-shrink: 0; margin-left: 12px; }
-.infoSwatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.12); }
+.infoRight { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: 12px; }
+.infoSwatches { display: flex; gap: 4px; }
+.infoSwatch { width: 13px; height: 13px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.12); }
+.infoDims { font-size: 9px; color: var(--gb-muted); letter-spacing: 0.04em; }
+
+.playBtn {
+  width: 22px; height: 22px;
+  border: 1px solid var(--gb-border);
+  border-radius: 3px;
+  background: var(--gb-s3);
+  color: var(--gb-muted2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.12s, color 0.12s;
+  padding: 0;
+}
+.playBtn:hover { border-color: var(--gb-accent); color: var(--gb-accent); }
+.playBtnActive { border-color: var(--gb-accent); color: var(--gb-accent); }
 
 /* Code panel */
 .codePanel {

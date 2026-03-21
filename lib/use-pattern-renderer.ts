@@ -60,7 +60,9 @@ export function usePatternRenderer(): UsePatternRendererReturn {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = s.bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawPattern(ctx, s, 5, ox, oy);
+    // extMult=3 during animation (fast), 5 for static (full quality)
+    const ext = (ox !== 0 || oy !== 0) ? 3 : 5;
+    drawPattern(ctx, s, ext, ox, oy);
   }, []);
 
   // ── draw thumb ────────────────────────────────────────────────────
