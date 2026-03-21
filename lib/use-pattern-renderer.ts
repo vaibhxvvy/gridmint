@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PatternState } from '@/types/pattern';
 import { PATTERNS, drawPattern } from '@/lib/patterns/engine';
 import { DEFAULT_STATE, encodeState } from '@/lib/url-state';
+import { gsap } from 'gsap';
 
 const THUMB_SIZE = 58;
 
@@ -26,9 +27,8 @@ type PerPatternMem = Partial<Omit<PatternState, 'pattern'>>;
 const patternMemory = new Map<string, PerPatternMem>();
 
 // ── Tile cache ────────────────────────────────────────────────────────
-// We draw the pattern ONCE into a tile that is (3 × canvas size).
-// Animation just translates this tile — no redrawing per frame.
-// This works for ALL patterns including noise, waves, hex, carbon.
+// Pattern is drawn ONCE into a 3× canvas tile.
+// Every animation frame just blits it with a different offset — zero redraw.
 interface TileCache {
   canvas:   HTMLCanvasElement;
   stateKey: string;
@@ -36,51 +36,27 @@ interface TileCache {
   tileH:    number;
 }
 
-function stateKey(s: PatternState): string {
+function makeStateKey(s: PatternState): string {
   return `${s.pattern}|${s.bgColor}|${s.patColor}|${s.size}|${s.opacity}|${s.thickness}|${s.rotation}`;
 }
 
 function buildTile(s: PatternState, canvasW: number, canvasH: number): TileCache {
-  // Tile is 3×3 canvas sizes — gives full coverage for any offset up to (W, H)
   const tileW = canvasW * 3;
   const tileH = canvasH * 3;
   const tile  = document.createElement('canvas');
   tile.width  = tileW;
   tile.height = tileH;
   const ctx   = tile.getContext('2d')!;
-
-  // Fill bg
   ctx.fillStyle = s.bgColor;
   ctx.fillRect(0, 0, tileW, tileH);
-
-  // For noise: tile the pattern in a 3×3 grid using separate seeded draws
-  // For all others: draw with extMult=3 which covers the 3× canvas area perfectly
-  if (s.pattern === 'noise') {
-    // Draw noise 9 times to fill the 3×3 tile
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        // Create a small canvas for one cell
-        const cell = document.createElement('canvas');
-        cell.width = canvasW; cell.height = canvasH;
-        const cc = cell.getContext('2d')!;
-        drawPattern(cc, s, 5, 0, 0);
-        ctx.drawImage(cell, col * canvasW, row * canvasH);
-      }
-    }
-  } else {
-    // Draw pattern centred in the tile with extMult=1 (tile IS the canvas equivalent)
-    // We draw onto a canvas the size of the tile then blit it
-    const tmp = document.createElement('canvas');
-    tmp.width = tileW; tmp.height = tileH;
-    const tc = tmp.getContext('2d')!;
-    tc.fillStyle = s.bgColor;
-    tc.fillRect(0, 0, tileW, tileH);
-    // extMult=3 draws 3× the canvas — perfect for our 3× tile
-    drawPattern(tc, s, 3, 0, 0);
-    ctx.drawImage(tmp, 0, 0);
-  }
-
-  return { canvas: tile, stateKey: stateKey(s), tileW, tileH };
+  const tmp = document.createElement('canvas');
+  tmp.width = tileW; tmp.height = tileH;
+  const tc = tmp.getContext('2d')!;
+  tc.fillStyle = s.bgColor;
+  tc.fillRect(0, 0, tileW, tileH);
+  drawPattern(tc, s, 3, 0, 0);
+  ctx.drawImage(tmp, 0, 0);
+  return { canvas: tile, stateKey: makeStateKey(s), tileW, tileH };
 }
 
 export interface UsePatternRendererReturn {
@@ -99,58 +75,54 @@ export function usePatternRenderer(): UsePatternRendererReturn {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const thumbRefs = useRef<Record<string, HTMLCanvasElement | null>>({});
 
-  const rafId      = useRef<number>(0);
-  const animRafId  = useRef<number>(0);
-  // Offset in pixels — wraps to [0, tileW) and [0, tileH)
-  const animOffset = useRef({ x: 0, y: 0 });
-  const lastTime   = useRef<number>(0);
   const thumbTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rafId      = useRef<number>(0);
 
-  // pausedRef: freezes animation without touching state.animation
-  const pausedRef  = useRef(false);
+  // pausedRef: true = freeze animation without changing state.animation
+  const pausedRef = useRef(false);
 
-  // Tile cache — rebuilt only when pattern/colours/size change
-  const tileCache  = useRef<TileCache | null>(null);
+  // Tile cache — invalidated whenever pattern/colours/size change
+  const tileCache = useRef<TileCache | null>(null);
 
-  // ── Invalidate tile when state changes ───────────────────────────
-  const invalidateTile = useCallback(() => {
-    tileCache.current = null;
-  }, []);
+  // GSAP ticker callback ref — stored so we can remove it cleanly
+  const tickerFn = useRef<((time: number, deltaTime: number) => void) | null>(null);
 
-  // ── draw preview using tile cache ─────────────────────────────────
+  // Accumulated offset in px — wraps to tile size
+  const offset = useRef({ x: 0, y: 0 });
+
+  // ── draw preview ──────────────────────────────────────────────────
   const drawPreview = useCallback((s: PatternState, ox = 0, oy = 0) => {
     const canvas = canvasRef.current;
     if (!canvas || !canvas.width || !canvas.height) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
     const W = canvas.width, H = canvas.height;
+
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = s.bgColor;
     ctx.fillRect(0, 0, W, H);
 
-    // Noise: always redraw fresh — the random flicker IS the animation
-    // The 256px grain tile in engine.ts makes this fast enough for 60fps
+    // Noise: redraw fresh every frame — the flicker IS the effect
     if (s.pattern === 'noise') {
       drawPattern(ctx, s, 5, 0, 0);
       return;
     }
 
+    // Static draw
     if (ox === 0 && oy === 0) {
       drawPattern(ctx, s, 5, 0, 0);
       return;
     }
 
-    // All other patterns: use tile cache — draw once, translate per frame
-    const key = stateKey(s);
+    // Animated: blit from tile cache
+    const key = makeStateKey(s);
     if (!tileCache.current || tileCache.current.stateKey !== key) {
       tileCache.current = buildTile(s, W, H);
     }
-
     const { canvas: tile, tileW, tileH } = tileCache.current;
     const wx = ((ox % tileW) + tileW) % tileW;
     const wy = ((oy % tileH) + tileH) % tileH;
-
+    // 4-quadrant blit for seamless wrap
     ctx.drawImage(tile, wx - tileW, wy - tileH);
     ctx.drawImage(tile, wx,         wy - tileH);
     ctx.drawImage(tile, wx - tileW, wy);
@@ -160,7 +132,7 @@ export function usePatternRenderer(): UsePatternRendererReturn {
   // ── draw thumb ────────────────────────────────────────────────────
   const drawThumb = useCallback((patId: string, s: PatternState) => {
     const canvas = thumbRefs.current[patId];
-    if (!canvas || !canvas.width || !canvas.height) return;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const pat = PATTERNS.find(p => p.id === patId);
@@ -175,31 +147,28 @@ export function usePatternRenderer(): UsePatternRendererReturn {
     }, 2, 0, 0);
   }, []);
 
-  // ── animation loop ────────────────────────────────────────────────
+  // ── stop animation ────────────────────────────────────────────────
   const stopAnim = useCallback(() => {
-    cancelAnimationFrame(animRafId.current);
-    animRafId.current = 0;
-    lastTime.current  = 0;
+    if (tickerFn.current) {
+      gsap.ticker.remove(tickerFn.current);
+      tickerFn.current = null;
+    }
   }, []);
 
+  // ── start animation using GSAP ticker ────────────────────────────
+  // GSAP ticker gives rock-solid delta time, handles tab visibility,
+  // frame drops, and is synced to the display refresh rate.
   const startAnim = useCallback((s: PatternState) => {
     stopAnim();
     if (s.animation === 'none') return;
 
-    const tick = (now: number) => {
-      if (pausedRef.current) {
-        // Paused — keep RAF alive, don't advance
-        lastTime.current = 0; // reset so no jump when resumed
-        animRafId.current = requestAnimationFrame(tick);
-        return;
-      }
+    const fn = (_time: number, deltaTime: number) => {
+      if (pausedRef.current) return;
 
-      if (!lastTime.current) lastTime.current = now;
-      const dt    = Math.min((now - lastTime.current) / 1000, 0.05);
-      lastTime.current = now;
-
+      // deltaTime from GSAP is in ms — convert to seconds, cap at 50ms
+      const dt    = Math.min(deltaTime / 1000, 0.05);
       const speed = stateRef.current.animSpeed ?? 40;
-      const o     = animOffset.current;
+      const o     = offset.current;
 
       switch (stateRef.current.animation) {
         case 'left':       o.x -= speed * dt; break;
@@ -211,15 +180,15 @@ export function usePatternRenderer(): UsePatternRendererReturn {
       }
 
       drawPreview(stateRef.current, o.x, o.y);
-      animRafId.current = requestAnimationFrame(tick);
     };
 
-    animRafId.current = requestAnimationFrame(tick);
+    tickerFn.current = fn;
+    gsap.ticker.add(fn);
   }, [drawPreview, stopAnim]);
 
   // ── trigger render ────────────────────────────────────────────────
   const triggerRender = useCallback((s: PatternState, redrawAllThumbs: boolean) => {
-    invalidateTile();
+    tileCache.current = null; // invalidate on any state change
 
     if (s.animation !== 'none') {
       startAnim(s);
@@ -232,7 +201,6 @@ export function usePatternRenderer(): UsePatternRendererReturn {
     if (thumbTimer.current) clearTimeout(thumbTimer.current);
     thumbTimer.current = setTimeout(() => {
       if (redrawAllThumbs) {
-        // Stagger only the non-active thumbs using their own remembered state
         PATTERNS.forEach((pat, i) => {
           if (pat.id === s.pattern) {
             requestAnimationFrame(() => drawThumb(pat.id, s));
@@ -253,7 +221,7 @@ export function usePatternRenderer(): UsePatternRendererReturn {
     if (typeof window !== 'undefined') {
       history.replaceState(null, '', encodeState(s));
     }
-  }, [drawPreview, drawThumb, invalidateTile, startAnim, stopAnim]);
+  }, [drawPreview, drawThumb, startAnim, stopAnim]);
 
   // ── setState ─────────────────────────────────────────────────────
   const setState = useCallback((patch: Partial<PatternState>, activeOnly = true) => {
@@ -272,10 +240,8 @@ export function usePatternRenderer(): UsePatternRendererReturn {
       const next: PatternState = { ...cur, ...defs, ...(mem ?? defs), ...patch };
       stateRef.current = next;
       setStateRaw(next);
-      // Reset offset on pattern switch so new pattern starts from origin
-      animOffset.current = { x: 0, y: 0 };
-      // Reset pause on pattern switch — fix issue 5
-      pausedRef.current = false;
+      offset.current     = { x: 0, y: 0 };
+      pausedRef.current  = false;  // unpause on pattern switch
       triggerRender(next, true);
     } else {
       const next: PatternState = { ...cur, ...patch };
@@ -288,7 +254,7 @@ export function usePatternRenderer(): UsePatternRendererReturn {
   const resetState = useCallback(() => {
     patternMemory.clear();
     tileCache.current  = null;
-    animOffset.current = { x: 0, y: 0 };
+    offset.current     = { x: 0, y: 0 };
     pausedRef.current  = false;
     const next = { ...DEFAULT_STATE };
     stateRef.current = next;
@@ -303,13 +269,19 @@ export function usePatternRenderer(): UsePatternRendererReturn {
   }, [drawPreview, startAnim]);
 
   useEffect(() => {
+    // Set GSAP ticker to use RAF (default) and max fps
+    gsap.ticker.fps(60);
+
     drawPreview(stateRef.current, 0, 0);
     PATTERNS.forEach((pat, i) =>
       setTimeout(() => requestAnimationFrame(() =>
         drawThumb(pat.id, { ...DEFAULT_STATE, ...(PATTERN_DEFAULTS[pat.id] ?? {}), pattern: pat.id })
       ), i * 20)
     );
-    return () => { stopAnim(); cancelAnimationFrame(rafId.current); };
+    return () => {
+      stopAnim();
+      cancelAnimationFrame(rafId.current);
+    };
   }, [drawPreview, drawThumb, stopAnim]);
 
   return { state, setState, canvasRef, thumbRefs, resetState, redraw, pausedRef };
