@@ -271,35 +271,27 @@ export const PATTERNS: Pattern[] = [
     },
   },
 
-  // ── HEX ──
+  // ── CHECKERBOARD ──
   {
-    id: 'hex', name: 'Hex',
-    draw(ctx, { patColor, opacity, size, thickness, rotation }, extMult = 5, offsetX = 0, offsetY = 0) {
+    id: 'checker', name: 'Checker',
+    draw(ctx, { patColor, bgColor, opacity, size, rotation }, extMult = 5, offsetX = 0, offsetY = 0) {
       const W = ctx.canvas.width, H = ctx.canvas.height;
       const [r, g, b] = hexToRgb(patColor);
       drawSetup(ctx, rotation, W, H, extMult, offsetX, offsetY);
-      ctx.strokeStyle = `rgba(${r},${g},${b},${opacity / 100})`; ctx.lineWidth = thickness;
-      const hh = size * Math.sqrt(3) / 2, ext = Math.max(W, H) * extMult;
-      const rows = Math.ceil(ext / (hh * 2)) + 3, cols = Math.ceil(ext / (size * 1.5)) + 3;
-      for (let row = -1; row < rows; row++)
-        for (let c2 = -1; c2 < cols; c2++) {
-          const cx = c2 * size * 1.5, cy = row * hh * 2 + (c2 % 2 === 0 ? 0 : hh);
-          ctx.beginPath();
-          for (let i = 0; i < 6; i++) {
-            const ang = (Math.PI / 180) * (60 * i - 30);
-            i === 0 ? ctx.moveTo(cx + size * Math.cos(ang), cy + size * Math.sin(ang))
-                    : ctx.lineTo(cx + size * Math.cos(ang), cy + size * Math.sin(ang));
-          }
-          ctx.closePath(); ctx.stroke();
-        }
+      ctx.fillStyle = `rgba(${r},${g},${b},${opacity / 100})`;
+      const ext = Math.max(W, H) * extMult;
+      for (let x = 0; x < ext; x += size)
+        for (let y = 0; y < ext; y += size)
+          if (Math.floor(x / size + y / size) % 2 === 0)
+            ctx.fillRect(x, y, size, size);
       ctx.restore();
     },
-    css({ bgColor, patColor, opacity, size, thickness, rotation }) {
+    css({ bgColor, patColor, opacity, size, rotation }) {
       const [r, g, b] = hexToRgb(patColor);
       const a = (opacity / 100).toFixed(2);
-      const sw = Math.round(size * 3), sh = Math.round(size * Math.sqrt(3));
+      const s = size, h = Math.round(size / 2);
       const rotLine = rotation ? `\ntransform: rotate(${rotation}deg);` : '';
-      return `background-color: ${bgColor};\nbackground-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${sw}' height='${sh}'%3E%3Cpolygon points='${size},0 ${size * 1.5},${Math.round(size * Math.sqrt(3) / 2)} ${size},${sh} ${size * 0.5},${Math.round(size * Math.sqrt(3) / 2)}' fill='none' stroke='rgba(${r}%2C${g}%2C${b}%2C${a})' stroke-width='${thickness}'/%3E%3C/svg%3E");\nbackground-size: ${sw}px ${sh}px;${rotLine}`;
+      return `background-color: ${bgColor};\nbackground-image: linear-gradient(45deg, rgba(${r},${g},${b},${a}) 25%, transparent 25%), linear-gradient(-45deg, rgba(${r},${g},${b},${a}) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(${r},${g},${b},${a}) 75%), linear-gradient(-45deg, transparent 75%, rgba(${r},${g},${b},${a}) 75%);\nbackground-size: ${s}px ${s}px;\nbackground-position: 0 0, 0 ${h}px, ${h}px -${h}px, -${h}px 0px;${rotLine}`;
     },
   },
 
@@ -326,7 +318,19 @@ export const PATTERNS: Pattern[] = [
       const [r, g, b] = hexToRgb(patColor);
       const a = (opacity / 100).toFixed(2);
       const rotLine = rotation ? `\ntransform: rotate(${rotation}deg);` : '';
-      return `background-color: ${bgColor};\nbackground-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size * 6}' height='${size}'%3E%3Cpath d='M 0 ${Math.round(size * 0.5)} Q ${Math.round(size * 1.5)} 0 ${size * 3} ${Math.round(size * 0.5)} Q ${Math.round(size * 4.5)} ${size} ${size * 6} ${Math.round(size * 0.5)}' fill='none' stroke='rgba(${r}%2C${g}%2C${b}%2C${a})' stroke-width='${thickness}'/%3E%3C/svg%3E");\nbackground-size: ${size * 6}px ${size}px;${rotLine}`;
+      // Tile: one full sine cycle. Width = size*2π approx (use size*6 for good shape),
+      // Height = size. Control points chosen to match natural sine: peaks at W/4 and 3W/4.
+      const W = size * 6;
+      const H = size;
+      const mid = H * 0.5;
+      const amp = H * 0.38;
+      // Proper sine bezier: C points at ~0.36 of wavelength for accurate sine shape
+      const c1x = Math.round(W * 0.17), c2x = Math.round(W * 0.33);
+      const c3x = Math.round(W * 0.67), c4x = Math.round(W * 0.83);
+      const d = `M 0 ${mid} C ${c1x} ${Math.round(mid - amp)}, ${c2x} ${Math.round(mid - amp)}, ${Math.round(W * 0.5)} ${mid} C ${c3x} ${Math.round(mid + amp)}, ${c4x} ${Math.round(mid + amp)}, ${W} ${mid}`;
+      const stroke = `rgba(${r},${g},${b},${a})`;
+      const svg = `%3Csvg xmlns='http://www.w3.org/2000/svg' width='${W}' height='${H}' preserveAspectRatio='none'%3E%3Cpath d='${encodeURIComponent(d)}' fill='none' stroke='${encodeURIComponent(stroke)}' stroke-width='${thickness}'/%3E%3C/svg%3E`;
+      return `background-color: ${bgColor};\nbackground-image: url("data:image/svg+xml,${svg}");\nbackground-size: ${W}px ${H}px;${rotLine}`;
     },
   },
 
@@ -419,7 +423,7 @@ export function getImgCSS(state: PatternState): string {
 // SVG url() patterns (hex, waves) work too — browser tiles them seamlessly.
 export const CSS_ANIMATABLE = new Set([
   'dots', 'grid', 'rect', 'diagonal', 'hatch', 'carbon', 'halftone', 'plus',
-  'hex', 'waves',
+  'checker', 'waves',
 ]);
 
 // Extract animatable CSS properties from a pattern.
