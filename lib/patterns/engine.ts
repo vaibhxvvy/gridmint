@@ -415,24 +415,27 @@ export function getImgCSS(state: PatternState): string {
 }
 
 // ── CSS-animatable patterns ────────────────────────────────────────────
-// These patterns use pure CSS gradients — no SVG, no canvas.
-// Their background-position can be animated seamlessly by GSAP.
+// All patterns with CSS background-image output can animate via background-position.
+// SVG url() patterns (hex, waves) work too — browser tiles them seamlessly.
 export const CSS_ANIMATABLE = new Set([
   'dots', 'grid', 'rect', 'diagonal', 'hatch', 'carbon', 'halftone', 'plus',
+  'hex', 'waves',
 ]);
 
-// Extract background-image and background-size from a pattern's CSS output.
-// Returns null for patterns that use SVG url() — those fall back to canvas.
+// Extract animatable CSS properties from a pattern.
+// tileW/tileH = exact background-size in px — this is what GSAP animates by.
 export function getAnimatableCSS(state: PatternState): {
-  backgroundImage: string;
-  backgroundSize:  string;
-  backgroundPosition?: string;
+  backgroundImage:    string;
+  backgroundSize:     string;
+  backgroundPosition: string;
+  tileW:              number;
+  tileH:              number;
 } | null {
   if (!CSS_ANIMATABLE.has(state.pattern)) return null;
   const pat = PATTERNS.find(p => p.id === state.pattern);
   if (!pat) return null;
 
-  const raw = pat.css(state);
+  const raw   = pat.css(state);
   const lines = raw.split('\n');
 
   const imgLine  = lines.find(l => l.startsWith('background-image:'));
@@ -441,9 +444,20 @@ export function getAnimatableCSS(state: PatternState): {
 
   if (!imgLine || !sizeLine) return null;
 
+  const sizeStr = sizeLine.replace('background-size:', '').replace(/;$/, '').trim();
+  // Parse "WIDTHpx HEIGHTpx" — take first background-size value
+  const firstSize = sizeStr.split(',')[0].trim();
+  const [wStr, hStr] = firstSize.split(/\s+/);
+  const tileW = parseFloat(wStr) || state.size;
+  const tileH = parseFloat(hStr ?? wStr) || state.size;
+
   return {
     backgroundImage:    imgLine.replace('background-image:', '').replace(/;$/, '').trim(),
-    backgroundSize:     sizeLine.replace('background-size:', '').replace(/;$/, '').trim(),
-    backgroundPosition: posLine ? posLine.replace('background-position:', '').replace(/;$/, '').trim() : '0px 0px',
+    backgroundSize:     sizeStr,
+    backgroundPosition: posLine
+      ? posLine.replace('background-position:', '').replace(/;$/, '').trim()
+      : '0px 0px',
+    tileW,
+    tileH,
   };
 }

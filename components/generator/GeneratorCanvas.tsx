@@ -34,11 +34,14 @@ export function GeneratorCanvas({
   customWStr, customHStr,
   isPaused,
 }: Props) {
-  const cssLayerRef = useRef<HTMLDivElement>(null);
-  const tweenRef    = useRef<gsap.core.Tween | null>(null);
-  const posRef      = useRef({ x: 0, y: 0 });
+  const cssLayerRef  = useRef<HTMLDivElement>(null);
+  const tweenRef     = useRef<gsap.core.Tween | null>(null);
+  // Live offset — GSAP mutates this object directly
+  const offsetRef    = useRef({ x: 0, y: 0 });
+  // Track what the tween was built for — only restart if direction/speed/tileSize changed
+  const tweenKeyRef  = useRef('');
+  const restartTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Set canvas size once
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -49,82 +52,124 @@ export function GeneratorCanvas({
     }
   }, [canvasRef, onResize]);
 
-  const isAnimating    = state.animation !== 'none';
-  const isCSSMode      = isAnimating && CSS_ANIMATABLE.has(state.pattern);
-  const animCSS        = isCSSMode ? getAnimatableCSS(state) : null;
+  const isAnimating = state.animation !== 'none';
+  const isCSSMode   = isAnimating && CSS_ANIMATABLE.has(state.pattern);
+  const animCSS     = isCSSMode ? getAnimatableCSS(state) : null;
 
-  // ── GSAP CSS animation ─────────────────────────────────────────────
+  // ── GSAP tween management ────────────────────────────────────────────
   const stopTween = useCallback(() => {
     tweenRef.current?.kill();
     tweenRef.current = null;
+    tweenKeyRef.current = '';
   }, []);
 
-  const startTween = useCallback((s: PatternState, css: NonNullable<ReturnType<typeof getAnimatableCSS>>) => {
-    stopTween();
+  const buildTween = useCallback((
+    css: NonNullable<ReturnType<typeof getAnimatableCSS>>,
+    animation: string,
+    speed: number,
+  ) => {
     const el = cssLayerRef.current;
     if (!el) return;
 
-    // Distance to move per "cycle" = one background-size tile
-    // Parse first value from background-size e.g. "24px 24px" → 24
-    const sizeVal = parseFloat(css.backgroundSize.split(' ')[0]) || s.size;
-    const speed   = s.animSpeed ?? 40; // px/sec
-    const dur     = sizeVal / speed;   // seconds per tile
+    const { tileW, tileH } = css;
+    const secPerTileX = tileW / speed;
+    const secPerTileY = tileH / speed;
 
-    // Determine direction
+    // Kill previous
+    tweenRef.current?.kill();
+
+    // Determine per-tick delta
     let dx = 0, dy = 0;
-    switch (s.animation) {
-      case 'left':       dx = -sizeVal; break;
-      case 'right':      dx =  sizeVal; break;
-      case 'up':         dy = -sizeVal; break;
-      case 'down':       dy =  sizeVal; break;
-      case 'diag-left':  dx = -sizeVal; dy = -sizeVal; break;
-      case 'diag-right': dx =  sizeVal; dy = -sizeVal; break;
+    switch (animation) {
+      case 'left':       dx = -1; break;
+      case 'right':      dx =  1; break;
+      case 'up':         dy = -1; break;
+      case 'down':       dy =  1; break;
+      case 'diag-left':  dx = -1; dy = -1; break;
+      case 'diag-right': dx =  1; dy = -1; break;
     }
 
-    // Start from 0 every time — CSS background-position wraps naturally
-    gsap.set(el, { backgroundPosition: css.backgroundPosition ?? '0px 0px' });
-    posRef.current = { x: 0, y: 0 };
+    // We animate a proxy object and write backgroundPosition each tick.
+    // Offset wraps to tile size — this is the seamless part.
+    // GSAP modifiers handle the wrap so the tween value never grows unbounded.
+    const proxy = { t: 0 };
+    const speed_x = dx * speed; // px/sec
+    const speed_y = dy * speed;
+    let prevT = 0;
 
-    tweenRef.current = gsap.to(posRef.current, {
-      x: posRef.current.x + dx,
-      y: posRef.current.y + dy,
-      duration: dur,
+    tweenRef.current = gsap.to(proxy, {
+      t: 1,
+      duration: Math.max(secPerTileX, secPerTileY, 0.1),
       ease: 'none',
-      repeat: -1, // infinite
+      repeat: -1,
       onUpdate() {
         if (!cssLayerRef.current) return;
+        const now = proxy.t;
+        const dt  = now - prevT;
+        prevT = now;
+        offsetRef.current.x += speed_x * dt * Math.max(secPerTileX, secPerTileY);
+        offsetRef.current.y += speed_y * dt * Math.max(secPerTileX, secPerTileY);
+        // Wrap to tile size — seamless
+        offsetRef.current.x = ((offsetRef.current.x % tileW) + tileW) % tileW;
+        offsetRef.current.y = ((offsetRef.current.y % tileH) + tileH) % tileH;
         cssLayerRef.current.style.backgroundPosition =
-          `${posRef.current.x}px ${posRef.current.y}px`;
+          `${offsetRef.current.x}px ${offsetRef.current.y}px`;
       },
     });
-  }, [stopTween]);
+  }, []);
 
-  // Pause / resume
+  // Pause / resume without rebuilding
   useEffect(() => {
     if (!tweenRef.current) return;
     if (isPaused) tweenRef.current.pause();
     else tweenRef.current.resume();
   }, [isPaused]);
 
-  // Start / stop tween based on mode
+  // Main effect — update CSS properties live, only restart tween when needed
   useEffect(() => {
-    if (isCSSMode && animCSS) {
-      startTween(state, animCSS);
-    } else {
-      stopTween();
-      // Reset CSS layer position
-      if (cssLayerRef.current) {
-        cssLayerRef.current.style.backgroundPosition = '0px 0px';
-      }
-    }
-    return stopTween;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCSSMode, state.animation, state.pattern, state.animSpeed,
-      state.size, state.patColor, state.bgColor, state.opacity,
-      state.thickness, state.rotation]);
+    const el = cssLayerRef.current;
 
-  const isPhone   = layout === 'phone';
-  const isCustom  = layout === 'custom';
+    if (!isCSSMode || !animCSS || !el) {
+      stopTween();
+      return;
+    }
+
+    // Always update the CSS properties immediately (colour/size/opacity changes)
+    el.style.backgroundColor    = state.bgColor;
+    el.style.backgroundImage    = animCSS.backgroundImage;
+    el.style.backgroundSize     = animCSS.backgroundSize;
+
+    // Only restart tween if direction, speed, or tile size changed
+    const tweenKey = `${state.animation}|${state.animSpeed}|${animCSS.tileW}|${animCSS.tileH}`;
+    if (tweenKey === tweenKeyRef.current && tweenRef.current) {
+      // Tween is already running with correct params — don't restart
+      return;
+    }
+
+    tweenKeyRef.current = tweenKey;
+
+    // Debounce restart so rapid slider drags don't spam tween creation
+    if (restartTimer.current) clearTimeout(restartTimer.current);
+    restartTimer.current = setTimeout(() => {
+      buildTween(animCSS, state.animation, state.animSpeed ?? 40);
+      if (isPaused && tweenRef.current) tweenRef.current.pause();
+    }, 60);
+
+    return () => {
+      if (restartTimer.current) clearTimeout(restartTimer.current);
+    };
+  }, [
+    isCSSMode, animCSS?.backgroundImage, animCSS?.backgroundSize,
+    animCSS?.tileW, animCSS?.tileH,
+    state.bgColor, state.animation, state.animSpeed,
+    isPaused, stopTween, buildTween,
+  ]);
+
+  // Cleanup on unmount
+  useEffect(() => () => stopTween(), [stopTween]);
+
+  const isPhone     = layout === 'phone';
+  const isCustom    = layout === 'custom';
   const frameAspect = isPhone ? '9/16' : isCustom ? `${customW}/${customH}` : '16/9';
 
   return (
@@ -169,7 +214,7 @@ export function GeneratorCanvas({
         layout
         transition={{ type: 'spring', stiffness: 260, damping: 28 }}
       >
-        {/* Canvas — always present, hidden during CSS animation */}
+        {/* Canvas — hidden during CSS animation, used for static + export */}
         <canvas
           ref={canvasRef}
           width={CANVAS_W}
@@ -178,24 +223,24 @@ export function GeneratorCanvas({
           style={{ opacity: isCSSMode ? 0 : 1 }}
         />
 
-        {/* CSS seamless layer — shown only for CSS-animatable patterns */}
-        {isCSSMode && animCSS && (
-          <div
-            ref={cssLayerRef}
-            className={styles.cssLayer}
-            style={{
-              backgroundColor:   state.bgColor,
-              backgroundImage:   animCSS.backgroundImage,
-              backgroundSize:    animCSS.backgroundSize,
-              backgroundPosition: animCSS.backgroundPosition ?? '0px 0px',
-            }}
-          />
-        )}
+        {/* CSS seamless layer */}
+        <div
+          ref={cssLayerRef}
+          className={styles.cssLayer}
+          style={{
+            display:             isCSSMode ? 'block' : 'none',
+            backgroundColor:     state.bgColor,
+            backgroundImage:     animCSS?.backgroundImage ?? '',
+            backgroundSize:      animCSS?.backgroundSize  ?? '',
+            backgroundPosition:  '0px 0px',
+            backgroundRepeat:    'repeat',
+          }}
+        />
 
-        {/* Animation label */}
+        {/* Label */}
         {isAnimating && (
           <div className={styles.animLabel}>
-            {isCSSMode ? '✦ seamless' : '⟳ '}{!isCSSMode && state.animation}
+            {isCSSMode ? '✦ seamless' : `⟳ ${state.animation}`}
           </div>
         )}
       </motion.div>
